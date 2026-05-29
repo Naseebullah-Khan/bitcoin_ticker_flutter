@@ -11,42 +11,12 @@ class PriceScreen extends StatefulWidget {
 class PriceScreenState extends State<PriceScreen> {
   String? selectedCurrency = "USD";
 
-  void songLyrics() {
-    for (int i = 99; i > 0; i--) {
-      debugPrint(
-        "${i == 0 ? "No more" : i} ${i == 1 ? "bottle" : "bottles"} of beer on the wall, ${i == 0 ? "no more" : i} ${i == 1 ? "bottle" : "bottles"} of beer.",
-      );
-      debugPrint(
-        "Take one down and pass it around, ${i - 1 == 0 ? "no more" : i - 1} ${i - 1 == 1 ? "bottle" : "bottles"} of beer on the wall.",
-      );
+  List<DropdownMenuItem<String>> getCurrenciesList() {
+    List<DropdownMenuItem<String>> list = [];
+    for (String currency in currenciesList) {
+      list.add(DropdownMenuItem(value: currency, child: Text(currency)));
     }
-  }
-
-  void checkNumbers(List<int> myNumbers) {
-    List<int> winningNumbers = [12, 6, 34, 22, 41, 9];
-    int matchingNumbers = 0;
-    for (int number in myNumbers) {
-      if (winningNumbers.contains(number)) {
-        matchingNumbers += 1;
-      }
-    }
-    debugPrint(
-      "You have $matchingNumbers matching ${matchingNumbers < 2 ? "number" : "numbers"}.",
-    );
-  }
-
-  void whoIsWinning() {
-    List<int> ticket1 = [45, 2, 9, 18, 12, 33];
-    List<int> ticket2 = [41, 17, 26, 32, 7, 35];
-
-    checkNumbers(ticket1);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // songLyrics();
-    whoIsWinning();
+    return list;
   }
 
   @override
@@ -82,9 +52,7 @@ class PriceScreenState extends State<PriceScreen> {
             color: Colors.lightBlue,
             child: DropdownButton(
               value: selectedCurrency,
-              items: currenciesList.map((String value) {
-                return DropdownMenuItem(value: value, child: Text(value));
-              }).toList(),
+              items: getCurrenciesList(),
               onChanged: (value) {
                 setState(() {
                   selectedCurrency = value;
