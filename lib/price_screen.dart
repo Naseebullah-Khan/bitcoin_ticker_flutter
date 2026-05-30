@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import "dart:io" show Platform;
 
 import 'package:bitcoin_ticker_flutter/coin_data.dart';
+import 'package:bitcoin_ticker_flutter/crypto_card.dart';
 
 class PriceScreen extends StatefulWidget {
   const PriceScreen({super.key});
@@ -12,7 +13,8 @@ class PriceScreen extends StatefulWidget {
 }
 
 class PriceScreenState extends State<PriceScreen> {
-  int selectedCurrencyIndex = 0;
+  String selectedCurrency = "AUD";
+  Map<String, dynamic> values = {"BTC": '?', "ETH": '?', 'LTC': '?'};
 
   DropdownButton<String> androidPicker() {
     List<DropdownMenuItem<String>> list = [];
@@ -20,11 +22,12 @@ class PriceScreenState extends State<PriceScreen> {
       list.add(DropdownMenuItem(value: currency, child: Text(currency)));
     }
     return DropdownButton<String>(
-      value: currenciesList[selectedCurrencyIndex],
+      value: selectedCurrency,
       items: list,
-      onChanged: (selectedCurrency) {
+      onChanged: (currency) {
         setState(() {
-          selectedCurrencyIndex = currenciesList.indexOf(selectedCurrency!);
+          selectedCurrency = currency!;
+          getData();
         });
       },
     );
@@ -40,13 +43,42 @@ class PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
-      onSelectedItemChanged: (selectedCurrency) {
+      onSelectedItemChanged: (selectedCurrencyIndex) {
         setState(() {
-          selectedCurrencyIndex = selectedCurrency;
+          selectedCurrency = currenciesList[selectedCurrencyIndex];
+          getData();
         });
       },
       children: list,
     );
+  }
+
+  void getData() async {
+    var data = CoinData(currency: selectedCurrency);
+    await data.requestData();
+    setState(() {
+      values = data.prices;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  List<Widget> getCryptoCards() {
+    List<Widget> list = [];
+    for (var value in values.keys) {
+      list.add(
+        CryptoCard(
+          value: values[value],
+          currency: selectedCurrency,
+          crypto: value,
+        ),
+      );
+    }
+    return list;
   }
 
   @override
@@ -57,23 +89,9 @@ class PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = ? ${currenciesList[selectedCurrencyIndex]}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
-                ),
-              ),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: getCryptoCards(),
           ),
           Container(
             height: 150.0,
