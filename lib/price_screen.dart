@@ -1,6 +1,8 @@
-import 'package:bitcoin_ticker_flutter/coin_data.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import "dart:io" show Platform;
+
+import 'package:bitcoin_ticker_flutter/coin_data.dart';
 
 class PriceScreen extends StatefulWidget {
   const PriceScreen({super.key});
@@ -12,12 +14,39 @@ class PriceScreen extends StatefulWidget {
 class PriceScreenState extends State<PriceScreen> {
   int selectedCurrencyIndex = 0;
 
-  List<Widget> getPickerList() {
+  DropdownButton<String> androidPicker() {
+    List<DropdownMenuItem<String>> list = [];
+    for (String currency in currenciesList) {
+      list.add(DropdownMenuItem(value: currency, child: Text(currency)));
+    }
+    return DropdownButton<String>(
+      value: currenciesList[selectedCurrencyIndex],
+      items: list,
+      onChanged: (selectedCurrency) {
+        setState(() {
+          selectedCurrencyIndex = currenciesList.indexOf(selectedCurrency!);
+        });
+      },
+    );
+  }
+
+  CupertinoPicker iOSPicker() {
     List<Widget> list = [];
+
     for (String currency in currenciesList) {
       list.add(Text(currency));
     }
-    return list;
+
+    return CupertinoPicker(
+      backgroundColor: Colors.lightBlue,
+      itemExtent: 32.0,
+      onSelectedItemChanged: (selectedCurrency) {
+        setState(() {
+          selectedCurrencyIndex = selectedCurrency;
+        });
+      },
+      children: list,
+    );
   }
 
   @override
@@ -51,14 +80,7 @@ class PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: CupertinoPicker(
-              backgroundColor: Colors.lightBlue,
-              itemExtent: 32.0,
-              onSelectedItemChanged: (selectedCurrency) => setState(() {
-                selectedCurrencyIndex = selectedCurrency;
-              }),
-              children: getPickerList(),
-            ),
+            child: Platform.isIOS ? iOSPicker() : androidPicker(),
           ),
         ],
       ),
